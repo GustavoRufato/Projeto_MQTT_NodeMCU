@@ -40,19 +40,6 @@ Ele também conta com suporte a **atualização OTA**, facilitando a manutençã
 
 ---
 
-## Estrutura de Pastas
-
-```
-Projeto_MQTT_NodeMCU/
-├── .gitignore
-├── README.md
-├── platformio.ini
-└── src/
-    └── main.cpp
-```
-
----
-
 ## Pré-requisitos
 
 - **NodeMCU ESP8266**
@@ -193,6 +180,9 @@ Envie **ON** ou **OFF** como payload para controlar os LEDs.
 - Status: `casa/varanda/led/status`
 
 ---
+## Montagem na protoboard
+
+![protoboard](./include/img/WhatsApp%20Image%202025-06-10%20at%2019.30.15.jpeg)
 
 ## Contribuindo
 
