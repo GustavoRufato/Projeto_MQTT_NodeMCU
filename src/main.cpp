@@ -7,8 +7,8 @@ const char* password = "deadspades";
 const char* mqtt_server = "192.168.43.2";
 const int mqtt_port = 1883;
 
-const char* sub_topic_cocina = "casa/cozinha/led/set";
-const char* pub_topic_cocina = "casa/cozinha/led/status";
+const char* sub_topic_cozinha = "casa/cozinha/led/set";
+const char* pub_topic_cozinha = "casa/cozinha/led/status";
 
 const char* sub_topic_quarto1 = "casa/quarto1/led/set";
 const char* pub_topic_quarto1 = "casa/quarto1/led/status";
@@ -19,7 +19,7 @@ const char* pub_topic_quarto2 = "casa/quarto2/led/status";
 const char* sub_topic_varanda = "casa/varanda/led/set";
 const char* pub_topic_varanda = "casa/varanda/led/status";
 
-const uint8_t LED_COCINA = D1;
+const uint8_t LED_COZINHA = D1;
 const uint8_t LED_QUARTO1 = D2;
 const uint8_t LED_QUARTO2 = D3;
 const uint8_t LED_VARANDA = D4;
@@ -79,9 +79,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   String estado_json = "{\"estado\":\"" + msg + "\"}";
 
-  if (String(topic) == sub_topic_cocina) {
-    digitalWrite(LED_COCINA, estado ? HIGH : LOW);
-    client.publish(pub_topic_cocina, estado_json.c_str(), true);
+  if (String(topic) == sub_topic_cozinha) {
+    digitalWrite(LED_COZINHA, estado ? HIGH : LOW);
+    client.publish(pub_topic_cozinha, estado_json.c_str(), true);
     Serial.println("Cozinha: " + msg);
   } else if (String(topic) == sub_topic_quarto1) {
     digitalWrite(LED_QUARTO1, estado ? HIGH : LOW);
@@ -111,7 +111,7 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("Conectado ao broker!");
 
-      client.subscribe(sub_topic_cocina);
+      client.subscribe(sub_topic_cozinha);
       client.subscribe(sub_topic_quarto1);
       client.subscribe(sub_topic_quarto2);
       client.subscribe(sub_topic_varanda);
@@ -130,12 +130,12 @@ void setup() {
   delay(50);
   Serial.println("\n=== Iniciando NodeMCU + MQTT + OTA ===");
 
-  pinMode(LED_COCINA, OUTPUT);
+  pinMode(LED_COZINHA, OUTPUT);
   pinMode(LED_QUARTO1, OUTPUT);
   pinMode(LED_QUARTO2, OUTPUT);
   pinMode(LED_VARANDA, OUTPUT);
 
-  digitalWrite(LED_COCINA, LOW);
+  digitalWrite(LED_COZINHA, LOW);
   digitalWrite(LED_QUARTO1, LOW);
   digitalWrite(LED_QUARTO2, LOW);
   digitalWrite(LED_VARANDA, LOW);
@@ -150,10 +150,10 @@ void setup() {
 
 void loop() {
   if (testeLEDs) {
-    digitalWrite(LED_COCINA, HIGH);
+    digitalWrite(LED_COZINHA, HIGH);
     Serial.println("LED Cozinha ON");
     delay(1000);
-    digitalWrite(LED_COCINA, LOW);
+    digitalWrite(LED_COZINHA, LOW);
 
     digitalWrite(LED_QUARTO1, HIGH);
     Serial.println("LED Quarto1 ON");
