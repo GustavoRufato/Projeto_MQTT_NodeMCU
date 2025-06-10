@@ -4,7 +4,7 @@
 
 const char* ssid = "dead.spades";
 const char* password = "deadspades";
-const char* mqtt_server = "192.168.43.2"; 
+const char* mqtt_server = "192.168.43.2";
 const int mqtt_port = 1883;
 
 const char* sub_topic_cocina = "casa/cozinha/led/set";
@@ -19,11 +19,15 @@ const char* pub_topic_quarto2 = "casa/quarto2/led/status";
 const char* sub_topic_varanda = "casa/varanda/led/set";
 const char* pub_topic_varanda = "casa/varanda/led/status";
 
-const uint8_t LED_PIN = D4;
-
+const uint8_t LED_COCINA = D1;
+const uint8_t LED_QUARTO1 = D2;
+const uint8_t LED_QUARTO2 = D3;
+const uint8_t LED_VARANDA = D4;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+bool testeLEDs = false;
 
 void setup_wifi() {
   Serial.print("Conectando na rede Wi-Fi: ");
@@ -71,30 +75,29 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   msg.toUpperCase();
 
-  if (msg == "ON") {
-    digitalWrite(LED_PIN, HIGH);
-    Serial.print("Recebido 'ON' em ");
-    Serial.println(topic);
-  } else if (msg == "OFF") {
-    digitalWrite(LED_PIN, LOW);
-    Serial.print("Recebido 'OFF' em ");
-    Serial.println(topic);
-  } else {
-    Serial.print("Comando desconhecido: ");
-    Serial.println(msg);
-    return; 
-  }
+  bool estado = (msg == "ON");
 
   String estado_json = "{\"estado\":\"" + msg + "\"}";
 
   if (String(topic) == sub_topic_cocina) {
+    digitalWrite(LED_COCINA, estado ? HIGH : LOW);
     client.publish(pub_topic_cocina, estado_json.c_str(), true);
+    Serial.println("Cozinha: " + msg);
   } else if (String(topic) == sub_topic_quarto1) {
+    digitalWrite(LED_QUARTO1, estado ? HIGH : LOW);
     client.publish(pub_topic_quarto1, estado_json.c_str(), true);
+    Serial.println("Quarto1: " + msg);
   } else if (String(topic) == sub_topic_quarto2) {
+    digitalWrite(LED_QUARTO2, estado ? HIGH : LOW);
     client.publish(pub_topic_quarto2, estado_json.c_str(), true);
+    Serial.println("Quarto2: " + msg);
   } else if (String(topic) == sub_topic_varanda) {
+    digitalWrite(LED_VARANDA, estado ? HIGH : LOW);
     client.publish(pub_topic_varanda, estado_json.c_str(), true);
+    Serial.println("Varanda: " + msg);
+  } else {
+    Serial.print("Tópico desconhecido: ");
+    Serial.println(topic);
   }
 }
 
@@ -125,22 +128,52 @@ void reconnect() {
 void setup() {
   Serial.begin(9600);
   delay(50);
-  Serial.println();
-  Serial.println("=== Iniciando NodeMCU + MQTT + OTA ===");
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
+  Serial.println("\n=== Iniciando NodeMCU + MQTT + OTA ===");
 
-  setup_wifi();
-  setup_ota();
+  pinMode(LED_COCINA, OUTPUT);
+  pinMode(LED_QUARTO1, OUTPUT);
+  pinMode(LED_QUARTO2, OUTPUT);
+  pinMode(LED_VARANDA, OUTPUT);
 
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
+  digitalWrite(LED_COCINA, LOW);
+  digitalWrite(LED_QUARTO1, LOW);
+  digitalWrite(LED_QUARTO2, LOW);
+  digitalWrite(LED_VARANDA, LOW);
+
+  if (!testeLEDs) {
+    setup_wifi();
+    setup_ota();
+    client.setServer(mqtt_server, mqtt_port);
+    client.setCallback(callback);
+  }
 }
 
 void loop() {
-  if (!client.connected()) {
-    reconnect();
+  if (testeLEDs) {
+    digitalWrite(LED_COCINA, HIGH);
+    Serial.println("LED Cozinha ON");
+    delay(1000);
+    digitalWrite(LED_COCINA, LOW);
+
+    digitalWrite(LED_QUARTO1, HIGH);
+    Serial.println("LED Quarto1 ON");
+    delay(1000);
+    digitalWrite(LED_QUARTO1, LOW);
+
+    digitalWrite(LED_QUARTO2, HIGH);
+    Serial.println("LED Quarto2 ON");
+    delay(1000);
+    digitalWrite(LED_QUARTO2, LOW);
+
+    digitalWrite(LED_VARANDA, HIGH);
+    Serial.println("LED Varanda ON");
+    delay(1000);
+    digitalWrite(LED_VARANDA, LOW);
+  } else {
+    if (!client.connected()) {
+      reconnect();
+    }
+    client.loop();
+    ArduinoOTA.handle();
   }
-  client.loop();
-  ArduinoOTA.handle(); 
 }
